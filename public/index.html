@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Multi-Tenant Light-Speed Engine</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-surface: #1e293b;
+            --text-main: #f8fafc;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            border-bottom: 2px solid var(--bg-surface);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .tenant-badge {
+            background-color: var(--accent-green);
+            color: black;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background-color: var(--bg-surface);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-primary);
+            border: 1px solid #475569;
+            color: white;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: var(--accent-green);
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { opacity: 0.9; }
+        .status-pill {
+            color: var(--accent-green);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Universal Business Engine <span class="tenant-badge">Active Mode: Pharmacy</span></h1>
+        <p>System Status: <span id="sync-status" class="status-pill">Offline UI Stable (Sub-0.1s Local Execution Core)</span></p>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Financial Bookkeeping</h2>
+            <form id="financial-form">
+                <label>Transaction Type</label>
+                <select id="fin-type">
+                    <option value="REVENUE">Revenue Inflow</option>
+                    <option value="EXPENSE">Expense Outflow</option>
+                </select>
+
+                <label>Amount (TZS)</label>
+                <input type="number" id="fin-amount" placeholder="e.g. 50000" required>
+
+                <label>Description Reference</label>
+                <input type="text" id="fin-desc" placeholder="e.g. Wholesale stock purchase" required>
+
+                <button type="submit">Log Financial Entry</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Customer Service & Complaints</h2>
+            <form id="complaint-form">
+                <label>Customer Contact Name / Phone</label>
+                <input type="text" id="comp-customer" placeholder="e.g. Abel Mazinge" required>
+
+                <label>Service Area Affected</label>
+                <select id="comp-area">
+                    <option value="PHARMACY_DISPENSARY">Pharmacy Operations</option>
+                    <option value="RETAIL_COUNTER">General Retail/Wholesale Counter</option>
+                    <option value="LAB_SERVICE">Clinical Laboratory Operations</option>
+                </select>
+
+                <label>Detailed Complaint Description</label>
+                <textarea id="comp-text" rows="3" placeholder="Describe the specific service issue to refine operations..." required></textarea>
+
+                <button type="submit" style="background-color: #38bdf8;">Log Complaint Record</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="database.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
