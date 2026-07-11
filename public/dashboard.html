@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Management Dashboard | Abel Pharmacy</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #334155; }
+        h1 { color: #38bdf8; }
+    </style>
+</head>
+<body>
+    <h1>Management Control Panel</h1>
+    <a href="/" style="color: #38bdf8;">← Back to POS</a>
+
+    <div class="card">
+        <h2>Financial Ledger</h2>
+        <table id="financial-table">
+            <thead><tr><th>Type</th><th>Amount (TZS)</th><th>Description</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>TMDA Quarantine Log</h2>
+        <table id="tmda-table">
+            <thead><tr><th>Product</th><th>Qty</th><th>Reason</th><th>Loss (TZS)</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Load Engine Core and Dashboard Script using relative pathing -->
+    <script src="./database.js"></script>
+    <script src="./dashboard.js"></script>
+</body>
+</html>

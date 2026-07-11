@@ -98,7 +98,23 @@ function localWrite(storeName, data) {
 // Export functions to global window namespace for access by user interface controllers
 window.initIndexedDB = initIndexedDB;
 window.localWrite = localWrite;
+/**
+ * Reads all records from a specific local database store instantly (Zero-Latency Read).
+ */
+function localGetAll(storeName) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([storeName], 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.getAll();
+
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+window.localGetAll = localGetAll;
 
 // ==========================================
 // END OF FILE: public/database.js
 // ==========================================
+

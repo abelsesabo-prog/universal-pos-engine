@@ -125,6 +125,70 @@
         </div>
     </div>
 </div>
+<!-- Section: POS Active Sales Dual-Pane (Continuous-Focus) -->
+        <div class="card" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 20px;">
+            
+            <!-- Left Pane: Quick Data Entry Zone -->
+            <div style="flex: 1; min-width: 300px;">
+                <h2>Barcode / Search Entry</h2>
+                <input type="text" id="pos-barcode" placeholder="Scan Barcode or Type Item..." autocomplete="off">
+                <div id="smart-catalog" style="max-height: 150px; overflow-y: auto; background: var(--bg-primary); border: 1px solid #475569; padding: 10px; border-radius: 4px;">
+                    <p style="color: gray; font-size: 0.85rem; margin: 0;">Smart Catalog Grid will appear here. Zero-stock items are hidden.</p>
+                </div>
+            </div>
+
+            <!-- Right Pane: Transaction Tracking Cart & Payment -->
+            <div style="flex: 1; min-width: 300px;">
+                <h2>Active Checkout Cart</h2>
+                <ul id="pos-cart" style="list-style: none; padding: 0; margin-bottom: 15px; border: 1px solid #475569; padding: 10px; border-radius: 4px; min-height: 50px;">
+                    <li style="color: gray; font-size: 0.85rem;">Cart is currently empty. Scan an item.</li>
+                </ul>
+                
+                <label>Integrated Payment-Type Selector</label>
+                <select id="pos-payment-type">
+                    <option value="CASH_TZS">Cash Payment Tier (TZS)</option>
+                    <option value="MIX_BY_YASS">Mobile Money: MIX BY YASS (Tigo Pesa)</option>
+                    <option value="MPESA">Mobile Money: M-Pesa</option>
+                    <option value="AIRTEL">Mobile Money: Airtel Money</option>
+                    <option value="USD">Foreign Currency: USD to TZS Matrix</option>
+                </select>
+                
+                <button id="pos-checkout-btn">Complete Transaction & Print EFD</button>
+            </div>
+            <!-- Section: TMDA Regulatory Compliance Matrix -->
+        <div class="card" style="grid-column: 1 / -1; border: 2px solid var(--accent-red); margin-top: 10px;">
+            <h2><span style="color: var(--accent-red);">⚠</span> TMDA Quarantine & Disposal Ledger</h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: -10px; margin-bottom: 20px;">
+                Isolates unfit stock from the active sales floor and logs data for statutory inspector write-offs.
+            </p>
+            
+            <form id="tmda-form" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: end;">
+                <div style="flex: 2; min-width: 200px;">
+                    <label>Scan / Type Product Name</label>
+                    <input type="text" id="tmda-product" placeholder="e.g. Amoxicillin" required autocomplete="off">
+                </div>
+                
+                <div style="flex: 1; min-width: 100px;">
+                    <label>Quarantine Quantity</label>
+                    <input type="number" id="tmda-qty" min="1" placeholder="e.g. 50" required>
+                </div>
+
+                <div style="flex: 2; min-width: 200px;">
+                    <label>Discovered Defect Category</label>
+                    <select id="tmda-reason">
+                        <option value="EXPIRED">Standard Product Expiration</option>
+                        <option value="DAMAGED">Physical Container/Blister Damage</option>
+                        <option value="SUBSTANDARD">Substandard / Degraded Chemical</option>
+                        <option value="RECALL">Regulatory Manufacturer Recall</option>
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <button type="submit" style="background-color: var(--accent-red); color: white;">Move to Quarantine</button>
+                </div>
+            </form>
+        </div>
+        </div>
 
 <script src="database.js"></script>
 <script src="app.js"></script>
