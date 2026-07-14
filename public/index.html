@@ -3,194 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Multi-Tenant Light-Speed Engine</title>
+    <title>Pharmacy POS & Inventory System</title>
     <style>
-        :root {
-            --bg-primary: #0f172a;
-            --bg-surface: #1e293b;
-            --text-main: #f8fafc;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-        }
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        header {
-            border-bottom: 2px solid var(--bg-surface);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .tenant-badge {
-            background-color: var(--accent-green);
-            color: black;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85rem;
-        }
-        .grid {
+        body { font-family: sans-serif; background: #f8fafc; margin: 0; }
+        
+        /* Navigation Style */
+        nav { padding: 12px; background: #334155; display: flex; gap: 10px; }
+        nav button { background: #475569; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        nav button:hover { background: #64748b; }
+        
+        /* Structural Layout Windows */
+        .app-window { min-height: 80vh; width: 100%; padding: 20px; box-sizing: border-box; }
+        .data-box { border: 1px solid #ccc; padding: 5px; border-radius: 4px; }
+        .add-btn { background: #16a34a; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
+        
+        /* Table Layouts */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #e2e8f0; padding: 10px; text-align: left; }
+        td { border-bottom: 1px solid #e2e8f0; }
+
+        /* POS Two-Pane Grid Component */
+        .pos-master-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: 65% 35%; 
+            gap: 20px; 
+            padding: 10px 0;
+            height: 100%;
         }
-        .card {
-            background-color: var(--bg-surface);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+
+        /* Master Two-Pane Grid Component */
+        .inventory-master-grid {
+            display: grid;
+            grid-template-columns: 40% 60%; 
+            gap: 20px; 
+            padding: 10px 0;
+            height: 100%; 
         }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            background: var(--bg-primary);
-            border: 1px solid #475569;
-            color: white;
-            border-radius: 4px;
-            box-sizing: border-box;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-        button {
-            background-color: var(--accent-green);
-            color: black;
-            border: none;
-            padding: 12px 20px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover { opacity: 0.9; }
-        .status-pill {
-            color: var(--accent-green);
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
+
+        /* Panes Styling */
+        .input-pane { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .list-pane { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; overflow-y: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+        /* Expandable Details System */
+        .details-row { display: none; background-color: #f9f9f9; }
+        .details-row.active { display: table-row; }
+        .view-btn { background: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        
+        /* Modal Window Styling */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-box { position: absolute; top: 20%; left: 50%; transform: translate(-50%, 0); width: 45%; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        
+        /* Data Fixer Deck Interface */
+        .fixer-deck { background: #f0fdf4; border: 2px dashed #22c55e; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>Universal Business Engine <span class="tenant-badge">Active Mode: Pharmacy</span></h1>
-        <p>System Status: <span id="sync-status" class="status-pill">Offline UI Stable (Sub-0.1s Local Execution Core)</span></p>
-    </header>
+    <!-- NAVIGATION BAR -->
+    <nav>
+        <button onclick="switchView('view-pos')">POS</button>
+        <button onclick="switchView('view-admin')">Financials</button>
+        <button onclick="switchView('view-tmda')">TMDA Quarantine</button>
+        <button onclick="switchView('view-add-inventory')">Add Inventory</button>
+    </nav>
 
-    <div class="grid">
-        <div class="card">
-            <h2>Financial Bookkeeping</h2>
-            <form id="financial-form">
-                <label>Transaction Type</label>
-                <select id="fin-type">
-                    <option value="REVENUE">Revenue Inflow</option>
-                    <option value="EXPENSE">Expense Outflow</option>
-                </select>
-
-                <label>Amount (TZS)</label>
-                <input type="number" id="fin-amount" placeholder="e.g. 50000" required>
-
-                <label>Description Reference</label>
-                <input type="text" id="fin-desc" placeholder="e.g. Wholesale stock purchase" required>
-
-                <button type="submit">Log Financial Entry</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h2>Customer Service & Complaints</h2>
-            <form id="complaint-form">
-                <label>Customer Contact Name / Phone</label>
-                <input type="text" id="comp-customer" placeholder="e.g. Abel Mazinge" required>
-
-                <label>Service Area Affected</label>
-                <select id="comp-area">
-                    <option value="PHARMACY_DISPENSARY">Pharmacy Operations</option>
-                    <option value="RETAIL_COUNTER">General Retail/Wholesale Counter</option>
-                    <option value="LAB_SERVICE">Clinical Laboratory Operations</option>
-                </select>
-
-                <label>Detailed Complaint Description</label>
-                <textarea id="comp-text" rows="3" placeholder="Describe the specific service issue to refine operations..." required></textarea>
-
-                <button type="submit" style="background-color: #38bdf8;">Log Complaint Record</button>
-            </form>
-        </div>
-    </div>
-</div>
-<!-- Section: POS Active Sales Dual-Pane (Continuous-Focus) -->
-        <div class="card" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 20px;">
-            
-            <!-- Left Pane: Quick Data Entry Zone -->
-            <div style="flex: 1; min-width: 300px;">
-                <h2>Barcode / Search Entry</h2>
-                <input type="text" id="pos-barcode" placeholder="Scan Barcode or Type Item..." autocomplete="off">
-                <div id="smart-catalog" style="max-height: 150px; overflow-y: auto; background: var(--bg-primary); border: 1px solid #475569; padding: 10px; border-radius: 4px;">
-                    <p style="color: gray; font-size: 0.85rem; margin: 0;">Smart Catalog Grid will appear here. Zero-stock items are hidden.</p>
-                </div>
-            </div>
-
-            <!-- Right Pane: Transaction Tracking Cart & Payment -->
-            <div style="flex: 1; min-width: 300px;">
-                <h2>Active Checkout Cart</h2>
-                <ul id="pos-cart" style="list-style: none; padding: 0; margin-bottom: 15px; border: 1px solid #475569; padding: 10px; border-radius: 4px; min-height: 50px;">
-                    <li style="color: gray; font-size: 0.85rem;">Cart is currently empty. Scan an item.</li>
-                </ul>
-                
-                <label>Integrated Payment-Type Selector</label>
-                <select id="pos-payment-type">
-                    <option value="CASH_TZS">Cash Payment Tier (TZS)</option>
-                    <option value="MIX_BY_YASS">Mobile Money: MIX BY YASS (Tigo Pesa)</option>
-                    <option value="MPESA">Mobile Money: M-Pesa</option>
-                    <option value="AIRTEL">Mobile Money: Airtel Money</option>
-                    <option value="USD">Foreign Currency: USD to TZS Matrix</option>
-                </select>
-                
-                <button id="pos-checkout-btn">Complete Transaction & Print EFD</button>
-            </div>
-            <!-- Section: TMDA Regulatory Compliance Matrix -->
-        <div class="card" style="grid-column: 1 / -1; border: 2px solid var(--accent-red); margin-top: 10px;">
-            <h2><span style="color: var(--accent-red);">⚠</span> TMDA Quarantine & Disposal Ledger</h2>
-            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: -10px; margin-bottom: 20px;">
-                Isolates unfit stock from the active sales floor and logs data for statutory inspector write-offs.
+    <!-- INVOICE MODAL (DIRECT FILE IMPORT UPGRADE) -->
+    <div id="invoice-modal" class="modal-overlay">
+        <div class="modal-box" style="border-top: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e293b;">📄 Import Invoice File</h3>
+            <p style="font-size: 0.85em; color: #64748b; margin-bottom: 15px;">
+                Select a <strong>.csv</strong> or <strong>.txt</strong> invoice file directly from your device.<br>
+                <span style="color: #0284c7;">Expected layout columns: Brand, Quantity, Batch, Expiry, Cost</span>
             </p>
             
-            <form id="tmda-form" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: end;">
-                <div style="flex: 2; min-width: 200px;">
-                    <label>Scan / Type Product Name</label>
-                    <input type="text" id="tmda-product" placeholder="e.g. Amoxicillin" required autocomplete="off">
+            <!-- Native Device File Interceptor Box -->
+            <div style="border: 2px dashed #cbd5e1; padding: 25px; text-align: center; border-radius: 6px; background: #f8fafc; margin-bottom: 20px; transition: border-color 0.2s;">
+                <input type="file" id="invoice-file-input" accept=".csv, .txt" style="font-size: 0.95em; color: #475569; cursor: pointer;">
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="toggleInvoiceModal()" style="padding: 10px 18px; background: #64748b; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Close</button>
+                <button onclick="processInvoiceFile()" style="padding: 10px 18px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                    🚀 Process & Import
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. POS MODULE WINDOW -->
+    <div id="view-pos" class="app-window" style="display: block;">
+        <div class="pos-master-grid">
+            <div class="input-pane">
+                <h2 style="margin-top: 0; color: #1e293b;">POS Checkout Station</h2>
+                <input type="text" id="pos-barcode" placeholder="Search medicines..." style="width: 100%; padding: 12px; margin-bottom: 15px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1em;">
+                <table>
+                    <thead>
+                        <tr><th>ITEM</th><th>STOCK</th><th>EXP</th><th>PRICE</th><th>QTY</th><th>MODE</th><th>TOTAL</th><th>ACTION</th></tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+            </div>
+
+            <div class="list-pane" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 65vh;">
+                <div>
+                    <h2 style="margin-top: 0; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Digital Receipt</h2>
+                    <ul id="pos-cart" style="list-style: none; padding: 0; margin-top: 10px; max-height: 35vh; overflow-y: auto;"></ul>
                 </div>
+                <div style="background-color: #f8fafc; border-top: 2px solid #cbd5e1; padding: 15px; border-radius: 6px;">
+                    <p style="font-size: 1.1em; margin: 5px 0;">Gross Total: <strong id="pos-gross-total" style="color: #0f172a;">0 TSH</strong></p>
+                    <button id="btn-show-expense" onclick="showExpenseInput()" style="background: #64748b; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-size: 0.9em; margin: 8px 0;">+ Log Expense</button>
+                    <div id="expense-input-row" style="display: none; background: #fff; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px; margin: 10px 0;">
+                        <input type="text" id="exp-name" placeholder="Expense Name" style="width: 100%; padding: 6px; margin-bottom: 6px; box-sizing: border-box;">
+                        <input type="number" id="exp-amt" placeholder="Amount" style="width: 100%; padding: 6px; margin-bottom: 6px; box-sizing: border-box;">
+                        <select id="exp-mode" style="width: 100%; padding: 6px; margin-bottom: 8px; box-sizing: border-box;"><option value="Cash">Cash</option><option value="M-Pesa">M-Pesa</option></select>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="addCheckoutExpense()" style="flex: 1; background: #16a34a; color: white; border: none; padding: 6px; cursor: pointer; border-radius: 4px;">Add</button>
+                            <button onclick="hideExpenseInput()" style="flex: 1; background: #ef4444; color: white; border: none; padding: 6px; cursor: pointer; border-radius: 4px;">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="expense-list-display" style="font-size: 0.9em; color: #475569; margin-bottom: 8px;"></div>
+                    <p style="font-size: 1.25em; font-weight: bold; margin: 10px 0; border-top: 1px dashed #cbd5e1; padding-top: 10px; color: #1e3a8a;">Net Drawer: <span id="pos-net-total">0 TSH</span></p>
+                    <button id="pos-checkout-btn" style="width: 100%; padding: 15px; background: #2563eb; color: white; border: none; cursor: pointer; font-size: 1.2em; font-weight: bold; border-radius: 6px;">Complete Sale</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. FINANCIAL WINDOW -->
+    <div id="view-admin" class="app-window" style="display: none;">
+        <h2>Financial Ledger</h2>
+        <form id="financial-form">
+            <select id="fin-type"><option value="Revenue">Revenue</option><option value="Expense">Expense</option></select>
+            <input type="number" id="fin-amount" placeholder="Amount" required>
+            <input type="text" id="fin-desc" placeholder="Description" required>
+            <button type="submit">Submit Entry</button>
+        </form>
+    </div>
+
+    <!-- 3. TMDA WINDOW -->
+    <div id="view-tmda" class="app-window" style="display: none;">
+        <h2>TMDA Quarantine Zone</h2>
+        <form id="tmda-form">
+            <input type="text" id="tmda-product" placeholder="Product Name" required>
+            <input type="number" id="tmda-qty" placeholder="Qty" required>
+            <input type="text" id="tmda-reason" placeholder="Reason for Quarantine" required>
+            <button type="submit">Execute Quarantine</button>
+        </form>
+    </div>
+
+    <!-- 4. ADD INVENTORY MODULE -->
+    <div id="view-add-inventory" class="app-window" style="display: none;">
+        <div class="inventory-master-grid">
+            
+            <!-- Left Pane: Technical Input Fields -->
+            <div class="input-pane">
+                <h2>Add Inventory Station</h2>
+                <div class="form-section">
+                    <label for="inv-search"><strong>🔍 Search Generic or Brand:</strong></label>
+                    <input type="text" id="inv-search" placeholder="Type medicine name to auto-fill..." style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
+                <div class="form-group-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <label style="font-size: 0.85em; color: #555;">Generic Name</label>
+                        <input type="text" id="inv-generic" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85em; color: #555;">Brand Name</label>
+                        <input type="text" id="inv-brand" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85em; color: #555;">Strength & Form</label>
+                        <input type="text" id="inv-strength-form" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85em; color: #555;">Manufacturer</label>
+                        <input type="text" id="inv-manufacturer" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85em; color: #555;">Reg. Agency</label>
+                        <input type="text" id="inv-agency" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85em; color: #555;">Registration Number</label>
+                        <input type="text" id="inv-reg-num" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
+                <div class="form-group-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                    <div>
+                        <label><strong>Batch / Lot Number</strong></label>
+                        <input type="text" id="inv-batch" placeholder="Enter Batch No." style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label><strong>Quantity to Add</strong></label>
+                        <input type="number" id="inv-qty" placeholder="0" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label>Mfg Date</label>
+                        <input type="date" id="inv-mfg-date" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label>Expiry Date</label>
+                        <input type="date" id="inv-exp-date" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label>Cost Price (TZS)</label>
+                        <input type="text" id="inv-cost" placeholder="0.00" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label>Selling Price (TZS)</label>
+                        <input type="number" id="inv-price" placeholder="0.00" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="btn-save-batch" style="flex: 1; background-color: #4CAF50; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Save & Add Batch</button>
+                    <button id="btn-save-new" style="flex: 1; background-color: #2196F3; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Save & New Item</button>
+                    <button onclick="toggleInvoiceModal()" style="width: 100%; margin-top: 10px; background-color: #ff9800; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">📄 Upload Invoice (Auto-Fill)</button>
+                </div>
+            </div>
+            
+            <!-- Right Pane: Live Inventory Dashboard Matrix -->
+            <div class="list-pane">
+                <h2 style="margin-top: 0;">Current Inventory Dashboard</h2>
                 
-                <div style="flex: 1; min-width: 100px;">
-                    <label>Quarantine Quantity</label>
-                    <input type="number" id="tmda-qty" min="1" placeholder="e.g. 50" required>
+                <!-- 🛠️ DYNAMIC BATCH DATA FIXER DECK -->
+                <div id="quick-fixer-deck" class="fixer-deck">
+                    <h4 style="margin: 0 0 10px 0; color: #16a34a; display: flex; justify-content: space-between;">
+                        <span>🛠️ Batch Correction Deck</span>
+                        <button onclick="closeFixer()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">X</button>
+                    </h4>
+                    <p style="font-size: 0.85em; margin: 0 0 10px 0; color: #3f6212;">Fixing Entry: <strong id="fix-item-title">None</strong></p>
+                    <input type="hidden" id="fix-item-index">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                        <div>
+                            <label style="font-size: 0.75em; font-weight: bold;">Real Batch No</label>
+                            <input type="text" id="fix-batch" style="width:100%; padding:4px; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75em; font-weight: bold;">Real Qty Count</label>
+                            <input type="number" id="fix-qty" style="width:100%; padding:4px; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75em; font-weight: bold;">Expiry Date</label>
+                            <input type="date" id="fix-exp" style="width:100%; padding:4px; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75em; font-weight: bold;">Selling Price (TZS)</label>
+                            <input type="number" id="fix-price" style="width:100%; padding:4px; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <button onclick="applyDatabaseFix()" style="margin-top: 10px; width: 100%; background: #16a34a; color: white; border: none; padding: 8px; font-weight: bold; border-radius: 4px; cursor: pointer;">Apply Corrections & Update POS</button>
                 </div>
 
-                <div style="flex: 2; min-width: 200px;">
-                    <label>Discovered Defect Category</label>
-                    <select id="tmda-reason">
-                        <option value="EXPIRED">Standard Product Expiration</option>
-                        <option value="DAMAGED">Physical Container/Blister Damage</option>
-                        <option value="SUBSTANDARD">Substandard / Degraded Chemical</option>
-                        <option value="RECALL">Regulatory Manufacturer Recall</option>
-                    </select>
+                <!-- Control Activation Trigger Instructions -->
+                <p style="font-size: 0.85em; background: #eff6ff; color: #1e40af; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                    <strong>💡 How to Fix Broken Layout Data:</strong> Double-click on any row in the table below to load its properties into the Correction Deck instantly!
+                </p>
+
+                <div class="list-search-container" style="margin-bottom: 15px;">
+                    <input type="text" id="list-search" placeholder="🔍 Search current stock layout..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                 </div>
 
-                <div style="flex: 1; min-width: 150px;">
-                    <button type="submit" style="background-color: var(--accent-red); color: white;">Move to Quarantine</button>
-                </div>
-            </form>
+                <table id="inventory-table">
+                    <thead style="background-color: #f8f9fa; border-bottom: 2px solid #ddd;">
+                        <tr>
+                            <th style="padding: 10px;">Item Name</th>
+                            <th style="padding: 10px;">Stock</th>
+                            <th style="padding: 10px;">Expiry</th>
+                            <th style="padding: 10px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body"></tbody>
+                </table>
+            </div>
+            
         </div>
-        </div>
+    </div>
 
-<script src="database.js"></script>
-<script src="app.js"></script>
+    <!-- AUTO-DICT INTEGRATION CONDUIT -->
+    <form id="add-inventory-form" style="display:none;">
+        <input type="text" class="dict-generic">
+        <input type="text" class="dict-brand">
+        <input type="text" class="dict-form">
+        <input type="number" class="dict-price">
+        <input type="number" class="dict-qty">
+    </form>
+    <div id="smart-scroll-box" style="display:none; position: absolute; border: 1px solid #ccc; background: white;"></div>
+
+    <script src="js/inventory.js"></script>
 </body>
 </html>
+ 
+

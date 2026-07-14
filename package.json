@@ -2,14 +2,14 @@
   "name": "universal-multi-tenant-engine",
   "version": "1.0.0",
   "description": "High-Performance Universal Multi-Tenant Business Optimization Engine",
-  "main": "server.js",
+  "main": "public/app.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node public/app.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "mongoose": "^8.2.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "mongoose": "^8.2.0"
   }
 }

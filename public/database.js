@@ -63,57 +63,59 @@ function initIndexedDB() {
   });
 }
 
-/**
- * Optimistic Write Pattern: Instantly writes data locally to prevent network lag.
- * Queues a task into the background network synchronization engine.
- */
-function localWrite(storeName, data) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([storeName, 'sync_queue'], 'readwrite');
-    const store = transaction.objectStore(storeName);
-    const queueStore = transaction.objectStore('sync_queue');
+// --- UNIVERSAL POS ENGINE - MULTI-TENANT CORE ---
+const CURRENT_TENANT = 'pharmacy_branch_01'; 
 
-    const putRequest = store.put(data);
-
-    putRequest.onsuccess = (e) => {
-      const generatedId = e.target.result;
-      const optimizedData = { ...data, id: generatedId };
-
-      // Queue an action event for background cloud cluster updates
-      const syncEvent = {
-        action: 'WRITE',
-        targetStore: storeName,
-        payload: optimizedData,
-        timestamp: Date.now()
-      };
-      
-      queueStore.add(syncEvent);
-      resolve(optimizedData);
-    };
-
-    transaction.onerror = (e) => reject(e.target.error);
-  });
-}
-
-// Export functions to global window namespace for access by user interface controllers
+// Make init function accessible globally
 window.initIndexedDB = initIndexedDB;
-window.localWrite = localWrite;
-/**
- * Reads all records from a specific local database store instantly (Zero-Latency Read).
- */
-function localGetAll(storeName) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([storeName], 'readonly');
-    const store = transaction.objectStore(storeName);
-    const request = store.getAll();
 
-    request.onsuccess = (e) => resolve(e.target.result);
-    request.onerror = (e) => reject(e.target.error);
-  });
-}
+// 1. Unified Write Logic
+window.localWrite = (storeName, data) => {
+    return new Promise((resolve, reject) => {
+        if (!db) {
+            console.error("❌ Database is not open!");
+            return reject("Database not initialized");
+        }
+        
+        const dataWithTenant = { ...data, tenantId: CURRENT_TENANT, timestamp: Date.now() };
+        const transaction = db.transaction([storeName], 'readwrite');
+        const store = transaction.objectStore(storeName);
+        
+        store.put(dataWithTenant);
+        
+        transaction.oncomplete = () => {
+            console.log(`[TENANT:${CURRENT_TENANT}] Successfully saved to ${storeName}`);
+            resolve();
+        };
+        transaction.onerror = (event) => reject(event.target.error);
+    });
+};
 
-window.localGetAll = localGetAll;
+// 2. Unified Read Logic
+window.localGetAll = (storeName) => {
+    return new Promise((resolve, reject) => {
+        if (!db) {
+            console.error("❌ Database is not open!");
+            return reject("Database not initialized");
+        }
 
+        const transaction = db.transaction([storeName], 'readonly');
+        const store = transaction.objectStore(storeName);
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+            const allData = request.result || [];
+            
+            // Allow items matching the tenant OR legacy items with no tenantId
+            const filteredData = allData.filter(item => 
+                item.tenantId === CURRENT_TENANT || !item.tenantId
+            );
+            
+            resolve(filteredData);
+        };
+        request.onerror = (event) => reject(event.target.error);
+    });
+};
 // ==========================================
 // END OF FILE: public/database.js
 // ==========================================
