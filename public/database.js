@@ -116,6 +116,48 @@ window.localGetAll = (storeName) => {
         request.onerror = (event) => reject(event.target.error);
     });
 };
+
+// Add a record to the sync queue
+window.addToSyncQueue = async (action, data) => {
+    const syncItem = {
+        action: action, // e.g., 'POST_PRODUCT'
+        payload: data,
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+    };
+    await window.localWrite('sync_queue', syncItem);
+    attemptSync(); // Try to push to server immediately
+};
+
+// The Bridge: Push data to MongoDB
+async function attemptSync() {
+    if (!navigator.onLine) return; // Don't try if offline
+
+    const queue = await window.localGetAll('sync_queue');
+    const pendingItems = queue.filter(item => item.status === 'pending');
+
+    for (const item of pendingItems) {
+        try {
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item.payload)
+            });
+
+            if (response.ok) {
+                // Mark as synced or remove from queue
+                console.log("✅ Synced successfully:", item.action);
+                await window.localDelete('sync_queue', item.id);
+            }
+        } catch (err) {
+            console.error("❌ Sync failed, will retry later:", err);
+            break; // Stop loop on error
+        }
+    }
+}
+
+// Auto-sync when internet returns
+window.addEventListener('online', attemptSync);
 // ==========================================
 // END OF FILE: public/database.js
 // ==========================================
