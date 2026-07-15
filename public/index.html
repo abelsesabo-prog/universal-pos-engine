@@ -42,10 +42,11 @@
         }
 
         .low-stock-alert {
-    background-color: #ffcccc !important;
-    color: #cc0000;
-    font-weight: bold;
-}
+            background-color: #ffcccc !important;
+            color: #cc0000;
+            font-weight: bold;
+        }
+        
         /* Panes Styling */
         .input-pane { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .list-pane { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; overflow-y: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -74,56 +75,55 @@
     </nav>
 
     <!-- --- BOUNDARY START: MAIN SEARCH BAR --- -->
-<div class="search-section" style="margin-bottom: 15px;">
-    <label for="pos-barcode" style="display: block; font-weight: bold; margin-bottom: 5px;">
-        Scan Barcode or Search Product:
-    </label>
-    <input 
-        type="text" 
-        id="pos-barcode" 
-        name="pos-barcode" 
-        placeholder="Type brand or scan barcode..." 
-        autocomplete="off"
-        style="width: 100%; padding: 10px; box-sizing: border-box;"
-    >
-</div>
-<!-- --- BOUNDARY END: MAIN SEARCH BAR --- -->
-
-<!-- --- BOUNDARY START: QUICK FIXER MODAL --- -->
-<div id="quick-fixer-deck" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000; border-radius: 8px; width: 300px;">
-    <h3 id="fix-item-title" style="margin-top: 0;">Product Name</h3>
-    
-    <!-- Hidden tracking index -->
-    <input type="hidden" id="fix-item-index" name="fix-item-index">
-
-    <div style="margin-bottom: 12px;">
-        <label for="fix-batch" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Batch Number:</label>
-        <input type="text" id="fix-batch" name="fix-batch" style="width: 100%; padding: 6px; box-sizing: border-box;">
+    <div class="search-section" style="margin-bottom: 15px;">
+        <label for="pos-barcode" style="display: block; font-weight: bold; margin-bottom: 5px;">
+            Scan Barcode or Search Product:
+        </label>
+        <input 
+            type="text" 
+            id="pos-barcode" 
+            name="pos-barcode" 
+            placeholder="Type brand or scan barcode..." 
+            autocomplete="off"
+            style="width: 100%; padding: 10px; box-sizing: border-box;"
+        >
     </div>
+    <!-- --- BOUNDARY END: MAIN SEARCH BAR --- -->
 
-    <div style="margin-bottom: 12px;">
-        <label for="fix-qty" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Quantity in Stock:</label>
-        <input type="number" id="fix-qty" name="fix-qty" style="width: 100%; padding: 6px; box-sizing: border-box;">
+    <!-- --- BOUNDARY START: QUICK FIXER MODAL --- -->
+    <div id="quick-fixer-deck" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000; border-radius: 8px; width: 300px;">
+        <h3 id="fix-item-title" style="margin-top: 0;">Product Name</h3>
+        
+        <input type="hidden" id="fix-item-index" name="fix-item-index">
+
+        <div style="margin-bottom: 12px;">
+            <label for="fix-batch" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Batch Number:</label>
+            <input type="text" id="fix-batch" name="fix-batch" style="width: 100%; padding: 6px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label for="fix-qty" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Quantity in Stock:</label>
+            <input type="number" id="fix-qty" name="fix-qty" style="width: 100%; padding: 6px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label for="fix-exp" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Expiry Date:</label>
+            <input type="date" id="fix-exp" name="fix-exp" style="width: 100%; padding: 6px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="fix-price" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Selling Price (TZS):</label>
+            <input type="number" id="fix-price" name="fix-price" style="width: 100%; padding: 6px; box-sizing: border-box;">
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" onclick="applyDatabaseFix()" style="padding: 6px 12px; cursor: pointer;">Apply Fix</button>
+            <button type="button" onclick="closeFixer()" style="padding: 6px 12px; cursor: pointer; background: #eee; border: 1px solid #ccc;">Close</button>
+        </div>
     </div>
+    <!-- --- BOUNDARY END: QUICK FIXER MODAL --- -->
 
-    <div style="margin-bottom: 12px;">
-        <label for="fix-exp" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Expiry Date:</label>
-        <input type="date" id="fix-exp" name="fix-exp" style="width: 100%; padding: 6px; box-sizing: border-box;">
-    </div>
-
-    <div style="margin-bottom: 15px;">
-        <label for="fix-price" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Selling Price (TZS):</label>
-        <input type="number" id="fix-price" name="fix-price" style="width: 100%; padding: 6px; box-sizing: border-box;">
-    </div>
-
-    <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button type="button" onclick="applyDatabaseFix()" style="padding: 6px 12px; cursor: pointer;">Apply Fix</button>
-        <button type="button" onclick="closeFixer()" style="padding: 6px 12px; cursor: pointer; background: #eee; border: 1px solid #ccc;">Close</button>
-    </div>
-</div>
-<!-- --- BOUNDARY END: QUICK FIXER MODAL --- -->
-
-    <!-- INVOICE MODAL (DIRECT FILE IMPORT UPGRADE) -->
+    <!-- INVOICE MODAL -->
     <div id="invoice-modal" class="modal-overlay">
         <div class="modal-box" style="border-top: 4px solid #2563eb;">
             <h3 style="margin-top: 0; color: #1e293b;">📄 Import Invoice File</h3>
@@ -132,19 +132,14 @@
                 <span style="color: #0284c7;">Expected layout columns: Brand, Quantity, Batch, Expiry, Cost</span>
             </p>
             
-            <!-- Native Device File Interceptor Box -->
             <div style="border: 2px dashed #cbd5e1; padding: 25px; text-align: center; border-radius: 6px; background: #f8fafc; margin-bottom: 20px; transition: border-color 0.2s;">
                 <input type="file" id="invoice-file-input" accept=".csv, .txt" style="font-size: 0.95em; color: #475569; cursor: pointer;">
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 <button onclick="toggleInvoiceModal()" style="padding: 10px 18px; background: #64748b; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Close</button>
-                <button onclick="processInvoiceFile()" style="padding: 10px 18px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; display: flex; align-items: center; gap: 5px;">
-                   🚀 Process & Import
-            <button onclick="finalizeSale()" style="background: green; color: white; padding: 10px;">
-                      Complete Sale & Update Stock
-                </button>
-                
+                <button onclick="processInvoiceFile()" style="padding: 10px 18px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">🚀 Process & Import</button>
+                <button onclick="finalizeSale()" style="background: green; color: white; padding: 10px;">Complete Sale</button>
             </div>
         </div>
     </div>
@@ -225,27 +220,27 @@
                 <div class="form-group-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                     <div>
                         <label style="font-size: 0.85em; color: #555;">Generic Name</label>
-                        <input type="text" id="inv-generic" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="inv-generic" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="font-size: 0.85em; color: #555;">Brand Name</label>
-                        <input type="text" id="inv-brand" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="inv-brand" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="font-size: 0.85em; color: #555;">Strength & Form</label>
-                        <input type="text" id="inv-strength-form" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="inv-strength-form" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="font-size: 0.85em; color: #555;">Manufacturer</label>
-                        <input type="text" id="inv-manufacturer" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="inv-manufacturer" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="font-size: 0.85em; color: #555;">Reg. Agency</label>
-                        <input type="text" id="inv-agency" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="inv-agency" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="font-size: 0.85em; color: #555;">Registration Number</label>
-                        <input type="text" id="inv-reg-num" readonly style="background-color: #f5f5f5; width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+                        <input type="text" id="inv-reg-num" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                 </div>
                 <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 15px;">
@@ -263,8 +258,7 @@
                         <input type="date" id="inv-mfg-date" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                     <div>
-                        <!-- Left Pane Form Completion -->
-                    <label>Expiry Date</label>
+                        <label>Expiry Date</label>
                         <input type="date" id="inv-exp-date" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                     <div>
@@ -288,7 +282,6 @@
             <div class="list-pane">
                 <h2 style="margin-top: 0; color: #1e293b;">Current Inventory Dashboard</h2>
                 
-                <!-- 🛠️ DYNAMIC BATCH DATA FIXER DECK -->
                 <div id="quick-fixer-deck" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                     <h4 style="margin: 0 0 10px 0; color: #16a34a; display: flex; justify-content: space-between;">
                         <span>🛠️ Batch Correction Deck</span>
@@ -318,7 +311,6 @@
                     <button onclick="applyDatabaseFix()" style="margin-top: 15px; width: 100%; background: #16a34a; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer;">Apply Corrections & Update POS</button>
                 </div>
 
-                <!-- Control Activation Trigger Instructions -->
                 <p style="font-size: 0.85em; background: #eff6ff; color: #1e40af; padding: 8px; border-radius: 4px; margin-bottom: 15px;">
                     <strong>💡 How to Fix Broken Layout Data:</strong> Double-click on any row in the table below to load its properties into the Correction Deck instantly!
                 </p>
@@ -338,8 +330,7 @@
                         </tr>
                     </thead>
                     <tbody id="inventory-table-body">
-                        <!-- Example Row: Double click this to test the Fixer Deck! -->
-                        <tr ondblclick="openFixer('Amoxicillin 500mg Caps', 'BTH-992', 150, 5000, '2026-12-01', this)" style="cursor: pointer; border-bottom: 1px solid #eee;">
+                        <tr style="cursor: pointer; border-bottom: 1px solid #eee;">
                             <td style="padding: 10px;">Amoxicillin 500mg Caps</td>
                             <td style="padding: 10px;">BTH-992</td>
                             <td style="padding: 10px;">150</td>
@@ -353,7 +344,6 @@
         </div>
     </div>
 
-    <!-- AUTO-DICT INTEGRATION CONDUIT -->
     <form id="add-inventory-form" style="display:none;">
         <input type="text" class="dict-generic">
         <input type="text" class="dict-brand">
@@ -363,12 +353,7 @@
     </form>
     <div id="smart-scroll-box" style="display:none; position: absolute; border: 1px solid #ccc; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;"></div>
     
-<!-- Load Engine Core FIRST -->
     <script src="./js/database.js"></script>
-    
-    <!-- Load Inventory/POS Logic SECOND -->
     <script src="./js/inventory.js"></script>
 </body>
 </html>
- 
-
