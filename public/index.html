@@ -51,17 +51,9 @@
         .input-pane { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .list-pane { background-color: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; overflow-y: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
-        /* Expandable Details System */
-        .details-row { display: none; background-color: #f9f9f9; }
-        .details-row.active { display: table-row; }
-        .view-btn { background: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
-        
         /* Modal Window Styling */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal-box { position: absolute; top: 20%; left: 50%; transform: translate(-50%, 0); width: 45%; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        
-        /* Data Fixer Deck Interface */
-        .fixer-deck { background: #f0fdf4; border: 2px dashed #22c55e; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: none; }
+        .modal-box { position: absolute; top: 10%; left: 50%; transform: translate(-50%, 0); width: 45%; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
@@ -69,59 +61,29 @@
     <!-- NAVIGATION BAR -->
     <nav>
         <button onclick="switchView('view-pos')">POS</button>
-        <button onclick="switchView('view-admin')">Financials</button>
+        <button onclick="switchView('view-admin')">Business & Complaints</button>
         <button onclick="switchView('view-tmda')">TMDA Quarantine</button>
         <button onclick="switchView('view-add-inventory')">Add Inventory</button>
+        <button onclick="openDictionary()" style="background: #8b5cf6; margin-left: auto;">📚 Item Dictionary</button>
     </nav>
 
-    <!-- --- BOUNDARY START: MAIN SEARCH BAR --- -->
-    <div class="search-section" style="margin-bottom: 15px;">
-        <label for="pos-barcode" style="display: block; font-weight: bold; margin-bottom: 5px;">
-            Scan Barcode or Search Product:
-        </label>
-        <input 
-            type="text" 
-            id="pos-barcode" 
-            name="pos-barcode" 
-            placeholder="Type brand or scan barcode..." 
-            autocomplete="off"
-            style="width: 100%; padding: 10px; box-sizing: border-box;"
-        >
-    </div>
-    <!-- --- BOUNDARY END: MAIN SEARCH BAR --- -->
+    <!-- 📚 UNIVERSAL DICTIONARY MODAL -->
+    <div id="dict-modal" class="modal-overlay">
+        <div class="modal-box" style="border-top: 4px solid #8b5cf6; width: 50%;">
+            <h2 style="margin-top: 0; color: #1e293b;">📚 Universal Item Dictionary</h2>
+            <p style="font-size: 0.85em; color: #64748b; margin-bottom: 15px;">Search clinical indications, dosages, and product details instantly.</p>
+            
+            <input type="text" id="dict-search" placeholder="Search any medicine or retail product..." style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1.1em;">
+            
+            <div id="dict-results" style="max-height: 400px; overflow-y: auto; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <p style="color: #64748b; font-size: 0.9em; text-align: center;">Start typing to pull data...</p>
+            </div>
 
-    <!-- --- BOUNDARY START: QUICK FIXER MODAL --- -->
-    <div id="quick-fixer-deck" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000; border-radius: 8px; width: 300px;">
-        <h3 id="fix-item-title" style="margin-top: 0;">Product Name</h3>
-        
-        <input type="hidden" id="fix-item-index" name="fix-item-index">
-
-        <div style="margin-bottom: 12px;">
-            <label for="fix-batch" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Batch Number:</label>
-            <input type="text" id="fix-batch" name="fix-batch" style="width: 100%; padding: 6px; box-sizing: border-box;">
-        </div>
-
-        <div style="margin-bottom: 12px;">
-            <label for="fix-qty" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Quantity in Stock:</label>
-            <input type="number" id="fix-qty" name="fix-qty" style="width: 100%; padding: 6px; box-sizing: border-box;">
-        </div>
-
-        <div style="margin-bottom: 12px;">
-            <label for="fix-exp" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Expiry Date:</label>
-            <input type="date" id="fix-exp" name="fix-exp" style="width: 100%; padding: 6px; box-sizing: border-box;">
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label for="fix-price" style="display: block; font-size: 0.9em; margin-bottom: 4px;">Selling Price (TZS):</label>
-            <input type="number" id="fix-price" name="fix-price" style="width: 100%; padding: 6px; box-sizing: border-box;">
-        </div>
-
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button type="button" onclick="applyDatabaseFix()" style="padding: 6px 12px; cursor: pointer;">Apply Fix</button>
-            <button type="button" onclick="closeFixer()" style="padding: 6px 12px; cursor: pointer; background: #eee; border: 1px solid #ccc;">Close</button>
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+                <button onclick="closeDictionary()" style="padding: 10px 20px; background: #64748b; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Close Dictionary</button>
+            </div>
         </div>
     </div>
-    <!-- --- BOUNDARY END: QUICK FIXER MODAL --- -->
 
     <!-- INVOICE MODAL -->
     <div id="invoice-modal" class="modal-overlay">
@@ -131,25 +93,25 @@
                 Select a <strong>.csv</strong> or <strong>.txt</strong> invoice file directly from your device.<br>
                 <span style="color: #0284c7;">Expected layout columns: Brand, Quantity, Batch, Expiry, Cost</span>
             </p>
-            
-            <div style="border: 2px dashed #cbd5e1; padding: 25px; text-align: center; border-radius: 6px; background: #f8fafc; margin-bottom: 20px; transition: border-color 0.2s;">
+            <div style="border: 2px dashed #cbd5e1; padding: 25px; text-align: center; border-radius: 6px; background: #f8fafc; margin-bottom: 20px;">
                 <input type="file" id="invoice-file-input" accept=".csv, .txt" style="font-size: 0.95em; color: #475569; cursor: pointer;">
             </div>
-
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="toggleInvoiceModal()" style="padding: 10px 18px; background: #64748b; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">Close</button>
-                <button onclick="processInvoiceFile()" style="padding: 10px 18px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">🚀 Process & Import</button>
-                <button onclick="finalizeSale()" style="background: green; color: white; padding: 10px;">Complete Sale</button>
+                <button onclick="toggleInvoiceModal()" style="padding: 10px 18px; background: #64748b; color: white; border: none; cursor: pointer; border-radius: 4px;">Close</button>
+                <button onclick="processInvoiceFile()" style="padding: 10px 18px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px;">🚀 Process & Import</button>
             </div>
         </div>
     </div>
 
     <!-- 1. POS MODULE WINDOW -->
     <div id="view-pos" class="app-window" style="display: block;">
+        <div class="search-section" style="margin-bottom: 15px;">
+            <label for="pos-barcode" style="display: block; font-weight: bold; margin-bottom: 5px;">Scan Barcode or Search Product:</label>
+            <input type="text" id="pos-barcode" placeholder="Type brand or scan barcode..." autocomplete="off" style="width: 100%; padding: 10px; box-sizing: border-box;">
+        </div>
         <div class="pos-master-grid">
             <div class="input-pane">
                 <h2 style="margin-top: 0; color: #1e293b;">POS Checkout Station</h2>
-                <input type="text" id="pos-barcode" placeholder="Search medicines..." style="width: 100%; padding: 12px; margin-bottom: 15px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1em;">
                 <table>
                     <thead>
                         <tr><th>ITEM</th><th>STOCK</th><th>EXP</th><th>PRICE</th><th>QTY</th><th>MODE</th><th>TOTAL</th><th>ACTION</th></tr>
@@ -183,26 +145,43 @@
         </div>
     </div>
 
-    <!-- 2. FINANCIAL WINDOW -->
+    <!-- 2. BUSINESS LEDGER & COMPLAINTS WINDOW -->
     <div id="view-admin" class="app-window" style="display: none;">
-        <h2>Financial Ledger</h2>
-        <form id="financial-form">
-            <select id="fin-type"><option value="Revenue">Revenue</option><option value="Expense">Expense</option></select>
-            <input type="number" id="fin-amount" placeholder="Amount" required>
-            <input type="text" id="fin-desc" placeholder="Description" required>
-            <button type="submit">Submit Entry</button>
-        </form>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="input-pane">
+                <h2>Financial Ledger</h2>
+                <form id="financial-form" onsubmit="event.preventDefault(); saveFinancialEntry();">
+                    <select id="fin-type" style="width: 100%; padding: 8px; margin-bottom: 10px;"><option value="Revenue">Revenue</option><option value="Expense">Expense</option></select>
+                    <input type="number" id="fin-amount" placeholder="Amount (TZS)" required style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <input type="text" id="fin-desc" placeholder="Description" required style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <button type="submit" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Submit Entry</button>
+                </form>
+                <table style="margin-top: 15px;"><thead><tr><th>Type</th><th>Amount</th><th>Desc</th></tr></thead><tbody id="fin-body"></tbody></table>
+            </div>
+
+            <div class="input-pane">
+                <h2>Customer Complaints</h2>
+                <form id="complaints-form" onsubmit="event.preventDefault(); saveComplaint();">
+                    <input type="text" id="comp-customer" placeholder="Customer Name" required style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <textarea id="comp-issue" placeholder="Issue Description" required style="width: 100%; padding: 8px; margin-bottom: 10px; height: 85px;"></textarea>
+                    <button type="submit" style="background: #ea580c; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Submit Complaint</button>
+                </form>
+                <table style="margin-top: 15px;"><thead><tr><th>Customer</th><th>Issue</th><th>Date</th></tr></thead><tbody id="comp-body"></tbody></table>
+            </div>
+        </div>
     </div>
 
     <!-- 3. TMDA WINDOW -->
     <div id="view-tmda" class="app-window" style="display: none;">
-        <h2>TMDA Quarantine Zone</h2>
-        <form id="tmda-form">
-            <input type="text" id="tmda-product" placeholder="Product Name" required>
-            <input type="number" id="tmda-qty" placeholder="Qty" required>
-            <input type="text" id="tmda-reason" placeholder="Reason for Quarantine" required>
-            <button type="submit">Execute Quarantine</button>
-        </form>
+        <div class="input-pane">
+            <h2>TMDA Quarantine Zone</h2>
+            <form id="tmda-form">
+                <input type="text" id="tmda-product" placeholder="Product Name" required style="padding: 8px; margin-right: 10px;">
+                <input type="number" id="tmda-qty" placeholder="Qty" required style="padding: 8px; margin-right: 10px;">
+                <input type="text" id="tmda-reason" placeholder="Reason for Quarantine" required style="padding: 8px; margin-right: 10px;">
+                <button type="submit" style="background: #dc2626; color: white; border: none; padding: 10px; border-radius: 4px;">Execute Quarantine</button>
+            </form>
+        </div>
     </div>
 
     <!-- 4. ADD INVENTORY MODULE -->
@@ -270,11 +249,10 @@
                         <input type="number" id="inv-price" placeholder="0" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                 </div>
-                <!-- Action Buttons -->
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
                     <button type="button" id="btn-save-batch" onclick="saveBatch()" style="flex: 1; background-color: #16a34a; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Save & Add Batch</button>
                     <button type="button" id="btn-save-new" onclick="saveNewItem()" style="flex: 1; background-color: #2563eb; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">Save & New Item</button>
-                    <button type="button" onclick="toggleInvoiceModal()" style="width: 100%; margin-top: 10px; background-color: #ea580c; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">📄 Upload Invoice (Auto-Fill)</button>
+                    <button type="button" onclick="document.getElementById('invoice-modal').style.display = 'block'" style="width: 100%; margin-top: 10px; background-color: #ea580c; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">📄 Upload Invoice (Auto-Fill)</button>
                 </div>
             </div>
             
@@ -311,10 +289,6 @@
                     <button onclick="applyDatabaseFix()" style="margin-top: 15px; width: 100%; background: #16a34a; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer;">Apply Corrections & Update POS</button>
                 </div>
 
-                <p style="font-size: 0.85em; background: #eff6ff; color: #1e40af; padding: 8px; border-radius: 4px; margin-bottom: 15px;">
-                    <strong>💡 How to Fix Broken Layout Data:</strong> Double-click on any row in the table below to load its properties into the Correction Deck instantly!
-                </p>
-
                 <div class="list-search-container" style="margin-bottom: 15px;">
                     <input type="text" id="list-search" placeholder="🔍 Search current stock layout..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                 </div>
@@ -330,28 +304,13 @@
                         </tr>
                     </thead>
                     <tbody id="inventory-table-body">
-                        <tr style="cursor: pointer; border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px;">Amoxicillin 500mg Caps</td>
-                            <td style="padding: 10px;">BTH-992</td>
-                            <td style="padding: 10px;">150</td>
-                            <td style="padding: 10px;">5000</td>
-                            <td style="padding: 10px;">2026-12-01</td>
-                        </tr>
+                        <!-- Content populated dynamically -->
                     </tbody>
                 </table>
             </div>
             
         </div>
     </div>
-
-    <form id="add-inventory-form" style="display:none;">
-        <input type="text" class="dict-generic">
-        <input type="text" class="dict-brand">
-        <input type="text" class="dict-form">
-        <input type="number" class="dict-price">
-        <input type="number" class="dict-qty">
-    </form>
-    <div id="smart-scroll-box" style="display:none; position: absolute; border: 1px solid #ccc; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;"></div>
     
     <script src="./js/database.js"></script>
     <script src="./js/inventory.js"></script>
