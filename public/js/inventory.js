@@ -394,22 +394,19 @@ function formatInvoiceData(rawData) {
 // 4. THE FILE INGESTOR (BUTTON CLICK VERSION)
 // ==========================================
 document.getElementById('processSmartInvoiceBtn').addEventListener('click', function() {
-    // Grab the file from the input when the button is clicked
     const fileInput = document.getElementById('smartUploader');
-    const file = fileInput.files[0];
     
-    if (!file) {
-        alert("Please select a file first!");
+    if (!fileInput || fileInput.files.length === 0) {
+        console.log("Input element:", fileInput);
+        alert("Wait, I don't see a file selected. Please click 'Choose File' again.");
         return;
     }
 
+    const file = fileInput.files[0];
     const fileType = file.name.split('.').pop().toLowerCase();
-    console.log(`Processing file type: ${fileType}`);
 
-    // Route 1: Spreadsheets and Text
     if (['xlsx', 'xls', 'csv', 'txt'].includes(fileType)) {
         const reader = new FileReader();
-        
         reader.onload = function(event) {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
@@ -418,18 +415,41 @@ document.getElementById('processSmartInvoiceBtn').addEventListener('click', func
             const rawJson = XLSX.utils.sheet_to_json(worksheet);
             
             const finalData = formatInvoiceData(rawJson);
-            alert(`Successfully processed ${finalData.length} items! Check console.`);
+            alert(`Successfully processed ${finalData.length} items!`);
         };
-        
         reader.readAsArrayBuffer(file);
     } 
-    // Route 2: Documents (Handed off to backend)
     else if (['pdf', 'doc', 'docx'].includes(fileType)) {
-        alert("PDF/Word detected. Since this is a document, we need the backend AI parser to read it. (Backend route coming soon!)");
+        alert("Detected a document (" + fileType + "). The engine is ready, but we need the backend AI parser to handle this format!");
     } else {
-        alert("Unsupported file format.");
+        alert("Unsupported file format: " + fileType);
     }
-});
+}); // This correctly closes the event listener
+
+// POS Screen Expense Handlers
+function showExpenseInput() { 
+    document.getElementById('expense-input-row').style.display = 'block'; 
+}
+
+function hideExpenseInput() { 
+    document.getElementById('expense-input-row').style.display = 'none'; 
+}
+
+function addCheckoutExpense() {
+    const name = document.getElementById('exp-name').value;
+    const amt = document.getElementById('exp-amt').value;
+    
+    if(name && amt) {
+        const display = document.getElementById('expense-list-display');
+        display.innerHTML += `<div style="color: #ef4444; margin-bottom: 3px;">- ${name}: ${amt} TZS</div>`;
+        
+        document.getElementById('exp-name').value = '';
+        document.getElementById('exp-amt').value = '';
+        hideCheckoutInput(); // Make sure this matches your function name
+    } else {
+        alert('Please enter both expense name and amount.');
+    }
+}
     
                // POS Screen Expense Handlers
 function showExpenseInput() { 
