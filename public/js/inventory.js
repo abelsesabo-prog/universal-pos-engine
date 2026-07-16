@@ -391,34 +391,33 @@ function formatInvoiceData(rawData) {
 }
 
 // ==========================================
-// 4. THE FILE INGESTOR
+// 4. THE FILE INGESTOR (BUTTON CLICK VERSION)
 // ==========================================
-document.getElementById('smartUploader').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+document.getElementById('processSmartInvoiceBtn').addEventListener('click', function() {
+    // Grab the file from the input when the button is clicked
+    const fileInput = document.getElementById('smartUploader');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert("Please select a file first!");
+        return;
+    }
 
     const fileType = file.name.split('.').pop().toLowerCase();
     console.log(`Processing file type: ${fileType}`);
 
-    // Route 1: Spreadsheets and Text (Processed instantly on the frontend)
+    // Route 1: Spreadsheets and Text
     if (['xlsx', 'xls', 'csv', 'txt'].includes(fileType)) {
         const reader = new FileReader();
         
         reader.onload = function(event) {
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            
-            // Get the first sheet
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            
-            // Convert to JSON
             const rawJson = XLSX.utils.sheet_to_json(worksheet);
             
-            // Run it through our Brain
             const finalData = formatInvoiceData(rawJson);
-            
-            // TODO: Send 'finalData' to your IndexedDB or Render Backend here!
             alert(`Successfully processed ${finalData.length} items! Check console.`);
         };
         
@@ -426,29 +425,13 @@ document.getElementById('smartUploader').addEventListener('change', function(e) 
     } 
     // Route 2: Documents (Handed off to backend)
     else if (['pdf', 'doc', 'docx'].includes(fileType)) {
-        alert("PDF/Word detected. Sending to backend extraction engine...");
-        
-        // Create FormData to send the actual file to your Node.js backend
-        const formData = new FormData();
-        formData.append('invoiceFile', file);
-
-        // This is where you will eventually call your backend API
-        /*
-        fetch('/api/upload-document', {
-            method: 'POST',
-            body: formData
-        }).then(response => response.json())
-          .then(data => {
-              // The backend AI sends back the JSON, and we run it through our Brain just in case
-              const finalData = formatInvoiceData(data);
-          });
-        */
+        alert("PDF/Word detected. Since this is a document, we need the backend AI parser to read it. (Backend route coming soon!)");
     } else {
         alert("Unsupported file format.");
     }
 });
-
-// POS Screen Expense Handlers
+    
+               // POS Screen Expense Handlers
 function showExpenseInput() { 
     document.getElementById('expense-input-row').style.display = 'block'; 
 }
