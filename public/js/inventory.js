@@ -255,3 +255,77 @@ function toggleInvoiceModal() {
     const modal = document.getElementById('invoice-modal');
     modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
 }
+
+// ==========================================
+// 7. INVOICE PROCESSING & POS EXPENSES
+// ==========================================
+
+async function processInvoiceFile() {
+    const fileInput = document.getElementById('invoice-file-input');
+    if (!fileInput.files.length) {
+        alert('Please select a .csv or .txt invoice file first.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+        const text = e.target.result;
+        const rows = text.split('\n');
+        let count = 0;
+
+        // Reads columns: Brand, Quantity, Batch, Expiry, Cost
+        for (let i = 1; i < rows.length; i++) { // Skip the header row (index 0)
+            if (!rows[i].trim()) continue; // Skip empty rows
+            
+            const cols = rows[i].split(',');
+            if (cols.length >= 5) {
+                const data = {
+                    brandName: cols[0].trim(),
+                    name: cols[0].trim(),
+                    quantity: parseInt(cols[1].trim()),
+                    batch: cols[2].trim(),
+                    expiryDate: cols[3].trim(),
+                    costPrice: parseFloat(cols[4].trim()),
+                    // Automatically adds a 30% markup to the cost price for selling price
+                    sellingPrice: Math.round(parseFloat(cols[4].trim()) * 1.3)
+                };
+                await window.localWrite('inventory', data);
+                await window.addToSyncQueue('ADD_PRODUCT', data);
+                count++;
+            }
+        }
+        alert(`✅ Successfully imported ${count} items from the invoice!`);
+        toggleInvoiceModal();
+        updateUI(); // Instantly refresh the UI
+    };
+    
+    reader.readAsText(file);
+}
+
+// POS Screen Expense Handlers
+function showExpenseInput() { 
+    document.getElementById('expense-input-row').style.display = 'block'; 
+}
+
+function hideExpenseInput() { 
+    document.getElementById('expense-input-row').style.display = 'none'; 
+}
+
+function addCheckoutExpense() {
+    const name = document.getElementById('exp-name').value;
+    const amt = document.getElementById('exp-amt').value;
+    
+    if(name && amt) {
+        const display = document.getElementById('expense-list-display');
+        display.innerHTML += `<div style="color: #ef4444; margin-bottom: 3px;">- ${name}: ${amt} TZS</div>`;
+        
+        // Reset fields and hide
+        document.getElementById('exp-name').value = '';
+        document.getElementById('exp-amt').value = '';
+        hideExpenseInput();
+    } else {
+        alert('Please enter both expense name and amount.');
+    }
+}
