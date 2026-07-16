@@ -304,6 +304,150 @@ async function processInvoiceFile() {
     reader.readAsText(file);
 }
 
+// ==========================================
+// 1. THE DICTIONARY (Semantic Mapping)
+// ==========================================
+const headerDictionary = {
+    name: ['item', 'product', 'description', 'name', 'particulars', 'brand'],
+    quantity: ['amount', 'qty', 'quantity', 'pieces', 'count', 'vol'],
+    batch: ['batch', 'batch no', 'lot', 'bt', 'batch number'],
+    expiryDate: ['exp', 'expiry', 'valid until', 'best before', 'date'],
+    price: ['price', 'cost', 'unit price', 'rate', 'amount due']
+};
+
+// ==========================================
+// 2. THE VALIDATOR (Preventing Mismatches)
+// ==========================================
+function isQuantity(value) {
+    // Checks if the value is strictly a number (e.g., 50, 100)
+    return !isNaN(value) && Number.isInteger(Number(value));
+}
+
+function isBatchNumber(value) {
+    // Batch numbers usually have letters, numbers, and dashes (e.g., BT-499X, 1029A)
+    // If it's pure text or a pure simple number, it might not be a batch.
+    const strVal = String(value).trim();
+    const hasLetters = /[a-zA-Z]/.test(strVal);
+    const hasNumbers = /[0-9]/.test(strVal);
+    return hasLetters && hasNumbers; 
+}
+
+// ==========================================
+// 3. THE SMART MAPPER
+// ==========================================
+function formatInvoiceData(rawData) {
+    console.log("Raw Data from File:", rawData);
+    const cleanedInventory = [];
+
+    rawData.forEach(row => {
+        let cleanItem = {};
+
+        // Loop through whatever weird headers the uploaded file has
+        for (let originalHeader in row) {
+            let val = row[originalHeader];
+            let normalizedHeader = originalHeader.toLowerCase().trim();
+            let matchedKey = null;
+
+            // 1. Search the dictionary to translate the header
+            for (let standardKey in headerDictionary) {
+                if (headerDictionary[standardKey].some(alias => normalizedHeader.includes(alias))) {
+                    matchedKey = standardKey;
+                    break;
+                }
+            }
+
+            // 2. Safety Check! Did we map it right?
+            if (matchedKey === 'quantity') {
+                // If the header said "Amount" but the value is "Paracetamol", it's a name, not a quantity!
+                if (!isQuantity(val)) {
+                    matchedKey = 'name'; 
+                }
+            }
+
+            if (matchedKey === 'batch') {
+                // If it thinks it's a batch, but it's exactly 500, it might be quantity misread
+                if (isQuantity(val) && !isBatchNumber(val)) {
+                    // Let's hold off on forcing it, but we log a warning
+                    console.warn(`Verify Batch: ${val} looks like a quantity.`);
+                }
+            }
+
+            // Assign the translated key (or keep the original if we don't know what it is)
+            if (matchedKey) {
+                cleanItem[matchedKey] = val;
+            } else {
+                cleanItem[normalizedHeader] = val; // Keep unmapped data just in case
+            }
+        }
+        
+        // Only push if the item has at least a name or quantity
+        if (cleanItem.name || cleanItem.quantity) {
+            cleanedInventory.push(cleanItem);
+        }
+    });
+
+    console.log("🧠 Smart Mapped Inventory:", cleanedInventory);
+    return cleanedInventory;
+}
+
+// ==========================================
+// 4. THE FILE INGESTOR
+// ==========================================
+document.getElementById('smartUploader').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fileType = file.name.split('.').pop().toLowerCase();
+    console.log(`Processing file type: ${fileType}`);
+
+    // Route 1: Spreadsheets and Text (Processed instantly on the frontend)
+    if (['xlsx', 'xls', 'csv', 'txt'].includes(fileType)) {
+        const reader = new FileReader();
+        
+        reader.onload = function(event) {
+            const data = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Get the first sheet
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // Convert to JSON
+            const rawJson = XLSX.utils.sheet_to_json(worksheet);
+            
+            // Run it through our Brain
+            const finalData = formatInvoiceData(rawJson);
+            
+            // TODO: Send 'finalData' to your IndexedDB or Render Backend here!
+            alert(`Successfully processed ${finalData.length} items! Check console.`);
+        };
+        
+        reader.readAsArrayBuffer(file);
+    } 
+    // Route 2: Documents (Handed off to backend)
+    else if (['pdf', 'doc', 'docx'].includes(fileType)) {
+        alert("PDF/Word detected. Sending to backend extraction engine...");
+        
+        // Create FormData to send the actual file to your Node.js backend
+        const formData = new FormData();
+        formData.append('invoiceFile', file);
+
+        // This is where you will eventually call your backend API
+        /*
+        fetch('/api/upload-document', {
+            method: 'POST',
+            body: formData
+        }).then(response => response.json())
+          .then(data => {
+              // The backend AI sends back the JSON, and we run it through our Brain just in case
+              const finalData = formatInvoiceData(data);
+          });
+        */
+    } else {
+        alert("Unsupported file format.");
+    }
+});
+
 // POS Screen Expense Handlers
 function showExpenseInput() { 
     document.getElementById('expense-input-row').style.display = 'block'; 

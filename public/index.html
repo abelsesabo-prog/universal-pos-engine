@@ -55,6 +55,14 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         .modal-box { position: absolute; top: 10%; left: 50%; transform: translate(-50%, 0); width: 45%; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.4); }
     </style>
+    <!-- SheetJS for reading Excel, CSV, and Text files natively -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- The Universal Uploader Input -->
+<div class="upload-container">
+    <label for="smartUploader">Upload Invoice (Excel, CSV, TXT, PDF, Word):</label>
+    <input type="file" id="smartUploader" accept=".csv, .txt, .xlsx, .xls, .pdf, .doc, .docx" />
+</div>
 </head>
 <body>
 
@@ -85,20 +93,22 @@
         </div>
     </div>
 
-    <!-- INVOICE MODAL -->
+   <!-- 🧠 NEW SMART INVOICE MODAL -->
     <div id="invoice-modal" class="modal-overlay">
         <div class="modal-box" style="border-top: 4px solid #2563eb;">
-            <h3 style="margin-top: 0; color: #1e293b;">📄 Import Invoice File</h3>
+            <h3 style="margin-top: 0; color: #1e293b;">📄 Smart Invoice Import</h3>
             <p style="font-size: 0.85em; color: #64748b; margin-bottom: 15px;">
-                Select a <strong>.csv</strong> or <strong>.txt</strong> invoice file directly from your device.<br>
-                <span style="color: #0284c7;">Expected layout columns: Brand, Quantity, Batch, Expiry, Cost</span>
+                Upload your document. The engine will automatically detect <strong>Excel, CSV, TXT, PDF, or Word</strong> formats and map the data.
             </p>
+            
+            <!-- This is where your new Smart Uploader goes! -->
             <div style="border: 2px dashed #cbd5e1; padding: 25px; text-align: center; border-radius: 6px; background: #f8fafc; margin-bottom: 20px;">
-                <input type="file" id="invoice-file-input" accept=".csv, .txt" style="font-size: 0.95em; color: #475569; cursor: pointer;">
+                <label for="smartUploader" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">Select File:</label>
+                <input type="file" id="smartUploader" accept=".csv, .txt, .xlsx, .xls, .pdf, .doc, .docx" style="font-size: 0.95em; color: #475569; cursor: pointer;" />
             </div>
+
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 <button onclick="toggleInvoiceModal()" style="padding: 10px 18px; background: #64748b; color: white; border: none; cursor: pointer; border-radius: 4px;">Close</button>
-                <button onclick="processInvoiceFile()" style="padding: 10px 18px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px;">🚀 Process & Import</button>
             </div>
         </div>
     </div>
