@@ -1,6 +1,9 @@
 // ==========================================
 // START OF FILE: server.js
 // ==========================================
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const upload = multer({ storage: multer.memoryStorage() });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -33,6 +36,41 @@ app.post('/api/sync', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// ==========================================
+// SMART DOCUMENT UPLOAD ENDPOINT
+// ==========================================
+app.post('/api/upload-document', upload.single('invoiceFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file received.' });
+        }
+
+        const fileType = req.file.originalname.split('.').pop().toLowerCase();
+        console.log(`📥 Received document for processing: ${req.file.originalname}`);
+
+        if (fileType === 'pdf') {
+            // Extract the text from the PDF buffer
+            const pdfData = await pdfParse(req.file.buffer);
+            const extractedText = pdfData.text;
+            
+            console.log("✅ PDF Text Extracted successfully!");
+            
+            // Send the raw text back to the frontend so we can see what LABRA PHARMA looks like!
+            res.status(200).json({ 
+                success: true, 
+                message: 'PDF successfully parsed!',
+                rawText: extractedText 
+            });
+        } else {
+            res.status(400).json({ success: false, message: 'Format not supported by backend yet.' });
+        }
+
+    } catch (error) {
+        console.error('Document Processing Error:', error);
+        res.status(500).json({ success: false, message: 'Backend failed to parse document' });
+    }
 });
 
 app.listen(PORT, () => {

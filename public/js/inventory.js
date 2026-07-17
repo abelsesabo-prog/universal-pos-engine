@@ -405,6 +405,7 @@ document.getElementById('processSmartInvoiceBtn').addEventListener('click', func
     const file = fileInput.files[0];
     const fileType = file.name.split('.').pop().toLowerCase();
 
+    // Route 1: Spreadsheets and Text
     if (['xlsx', 'xls', 'csv', 'txt'].includes(fileType)) {
         const reader = new FileReader();
         reader.onload = function(event) {
@@ -419,12 +420,36 @@ document.getElementById('processSmartInvoiceBtn').addEventListener('click', func
         };
         reader.readAsArrayBuffer(file);
     } 
+    // Route 2: Documents (Mr. AI Backend Handoff!)
     else if (['pdf', 'doc', 'docx'].includes(fileType)) {
-        alert("Detected a document (" + fileType + "). The engine is ready, but we need the backend AI parser to handle this format!");
+        alert("Mr. AI is taking over! Sending PDF to backend for extraction...");
+        
+        // Package the file up securely
+        const formData = new FormData();
+        formData.append('invoiceFile', file);
+
+        // Send it to your new Node.js route
+        fetch('/api/upload-document', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                console.log("🤖 Mr. AI Extracted Text:\n", data.rawText);
+                alert("Backend successfully read the PDF! Press F12 and check the Console to see the text.");
+            } else {
+                alert("Backend error: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error("Upload failed:", err);
+            alert("Failed to reach the backend server.");
+        });
     } else {
         alert("Unsupported file format: " + fileType);
     }
-}); // This correctly closes the event listener
+});
 
 // POS Screen Expense Handlers
 function showExpenseInput() { 
