@@ -2,7 +2,7 @@
 // START OF FILE: server.js
 // ==========================================
 const multer = require('multer');
-const pdfParse = require('pdf-parse');
+const pdf = require('pdf-parse'); // Changed this variable name!
 const upload = multer({ storage: multer.memoryStorage() });
 const express = require('express');
 const mongoose = require('mongoose');
@@ -51,13 +51,16 @@ app.post('/api/upload-document', upload.single('invoiceFile'), async (req, res) 
         console.log(`📥 Received document for processing: ${req.file.originalname}`);
 
         if (fileType === 'pdf') {
+            // THE BULLETPROOF FIX: Check how Node imported the library and grab the actual function
+            const extractText = typeof pdf === 'function' ? pdf : pdf.default;
+            
             // Extract the text from the PDF buffer
-            const pdfData = await pdfParse(req.file.buffer);
+            const pdfData = await extractText(req.file.buffer);
             const extractedText = pdfData.text;
             
             console.log("✅ PDF Text Extracted successfully!");
             
-            // Send the raw text back to the frontend so we can see what LABRA PHARMA looks like!
+            // Send the raw text back to the frontend
             res.status(200).json({ 
                 success: true, 
                 message: 'PDF successfully parsed!',
